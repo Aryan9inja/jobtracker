@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Status {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Job {
+  id          Int       @id @default(autoincrement())
+  company     String
+  jobTitle    String
+  status      Status    @default(SAVED)
+  priority    Priority  @default(MEDIUM)
+  dateApplied DateTime  @default(now())
+  jobUrl      String?   @db.Text
+  salaryRange String?
+  location    String?
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
