@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import type { Job } from "@/app/generated/prisma/client";
 
@@ -31,6 +31,15 @@ export default function JobForm({ initial, onClose, onSaved }: Props) {
   });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Close on Escape key
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -63,54 +72,68 @@ export default function JobForm({ initial, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-[10vh] backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800 animate-in fade-in slide-in-from-bottom-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             {isEdit ? "Edit Job" : "Add New Job"}
           </h2>
-          <button onClick={onClose} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Row: Company + Job Title */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
+          {/* Company + Job Title */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Company *">
+            <Field label="Company" required>
               <input name="company" value={form.company} onChange={handleChange} placeholder="Acme Inc." className={inputCls} required />
             </Field>
-            <Field label="Job Title *">
+            <Field label="Job Title" required>
               <input name="jobTitle" value={form.jobTitle} onChange={handleChange} placeholder="Software Engineer" className={inputCls} required />
             </Field>
           </div>
 
-          {/* Row: Status + Priority */}
+          {/* Status + Priority */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Status">
               <select name="status" value={form.status} onChange={handleChange} className={inputCls}>
-                {STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>)}
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s.charAt(0) + s.slice(1).toLowerCase()}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="Priority">
               <select name="priority" value={form.priority} onChange={handleChange} className={inputCls}>
-                {PRIORITIES.map((p) => <option key={p} value={p}>{p.charAt(0) + p.slice(1).toLowerCase()}</option>)}
+                {PRIORITIES.map((p) => (
+                  <option key={p} value={p}>
+                    {p.charAt(0) + p.slice(1).toLowerCase()}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
 
-          {/* Row: Date + Salary */}
+          {/* Date + Salary */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Date Applied">
               <input type="date" name="dateApplied" value={form.dateApplied} onChange={handleChange} className={inputCls} />
             </Field>
             <Field label="Salary Range">
-              <input name="salaryRange" value={form.salaryRange} onChange={handleChange} placeholder="e.g. $80k–$100k" className={inputCls} />
+              <input name="salaryRange" value={form.salaryRange} onChange={handleChange} placeholder="$80k \u2013 $100k" className={inputCls} />
             </Field>
           </div>
 
-          {/* Row: Location + URL */}
+          {/* Location + URL */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Location / Remote">
               <input name="location" value={form.location} onChange={handleChange} placeholder="Remote / New York" className={inputCls} />
@@ -122,22 +145,26 @@ export default function JobForm({ initial, onClose, onSaved }: Props) {
 
           {/* Notes */}
           <Field label="Notes">
-            <textarea name="notes" value={form.notes} onChange={handleChange} rows={3} placeholder="Add notes…" className={`${inputCls} resize-none`} />
+            <textarea name="notes" value={form.notes} onChange={handleChange} rows={3} placeholder="Interview notes, contacts, deadlines\u2026" className={`${inputCls} resize-none`} />
           </Field>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">{error}</p>}
 
           {/* Actions */}
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+          <div className="flex justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+            >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+              className="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-60 active:scale-[0.98] transition-all"
             >
-              {saving ? "Saving…" : isEdit ? "Save Changes" : "Add Job"}
+              {saving ? "Saving\u2026" : isEdit ? "Save Changes" : "Add Job"}
             </button>
           </div>
         </form>
@@ -146,14 +173,17 @@ export default function JobForm({ initial, onClose, onSaved }: Props) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+        {label}
+        {required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
       {children}
     </div>
   );
 }
 
 const inputCls =
-  "rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 w-full";
+  "rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 w-full transition-colors";

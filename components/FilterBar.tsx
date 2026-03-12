@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 
 export type Filters = {
   search: string;
@@ -15,8 +15,8 @@ type Props = {
   onChange: (filters: Filters) => void;
 };
 
-const STATUS_OPTIONS = ["", "SAVED", "APPLIED", "INTERVIEWING", "OFFER", "REJECTED"];
-const PRIORITY_OPTIONS = ["", "LOW", "MEDIUM", "HIGH"];
+const STATUS_OPTIONS = ["SAVED", "APPLIED", "INTERVIEWING", "OFFER", "REJECTED"];
+const PRIORITY_OPTIONS = ["LOW", "MEDIUM", "HIGH"];
 const SORT_OPTIONS = [
   { value: "dateApplied", label: "Date Applied" },
   { value: "company", label: "Company" },
@@ -25,69 +25,80 @@ const SORT_OPTIONS = [
   { value: "priority", label: "Priority" },
 ];
 
+const selectCls =
+  "appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 cursor-pointer transition-colors";
+
 export default function FilterBar({ filters, onChange }: Props) {
   function set(key: keyof Filters, value: string) {
     onChange({ ...filters, [key]: value });
   }
 
+  const hasFilters = filters.search || filters.status || filters.priority;
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Search */}
-      <div className="relative flex-1 min-w-45 max-w-xs">
+      <div className="relative flex-1 min-w-[200px] max-w-sm">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Search company, title…"
+          placeholder="Search company, title, location…"
           value={filters.search}
           onChange={(e) => set("search", e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
+          className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500 transition-colors"
         />
       </div>
 
       {/* Status */}
-      <select
-        value={filters.status}
-        onChange={(e) => set("status", e.target.value)}
-        className="rounded-lg border border-gray-200 bg-white py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-      >
+      <select value={filters.status} onChange={(e) => set("status", e.target.value)} className={selectCls}>
         <option value="">All Statuses</option>
-        {STATUS_OPTIONS.filter(Boolean).map((s) => (
-          <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
+        {STATUS_OPTIONS.map((s) => (
+          <option key={s} value={s}>
+            {s.charAt(0) + s.slice(1).toLowerCase()}
+          </option>
         ))}
       </select>
 
       {/* Priority */}
-      <select
-        value={filters.priority}
-        onChange={(e) => set("priority", e.target.value)}
-        className="rounded-lg border border-gray-200 bg-white py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-      >
+      <select value={filters.priority} onChange={(e) => set("priority", e.target.value)} className={selectCls}>
         <option value="">All Priorities</option>
-        {PRIORITY_OPTIONS.filter(Boolean).map((p) => (
-          <option key={p} value={p}>{p.charAt(0) + p.slice(1).toLowerCase()}</option>
+        {PRIORITY_OPTIONS.map((p) => (
+          <option key={p} value={p}>
+            {p.charAt(0) + p.slice(1).toLowerCase()}
+          </option>
         ))}
       </select>
 
       {/* Sort */}
       <div className="flex items-center gap-1">
-        <SlidersHorizontal size={15} className="text-gray-400" />
-        <select
-          value={filters.sort}
-          onChange={(e) => set("sort", e.target.value)}
-          className="rounded-lg border border-gray-200 bg-white py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-        >
+        <SlidersHorizontal size={14} className="text-gray-400" />
+        <select value={filters.sort} onChange={(e) => set("sort", e.target.value)} className={selectCls}>
           {SORT_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
+            <option key={value} value={value}>
+              {label}
+            </option>
           ))}
         </select>
         <button
           onClick={() => set("order", filters.order === "asc" ? "desc" : "asc")}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
-          title="Toggle sort order"
+          className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+          title={filters.order === "asc" ? "Ascending" : "Descending"}
         >
-          {filters.order === "asc" ? "↑" : "↓"}
+          {filters.order === "asc" ? "↑ Asc" : "↓ Desc"}
         </button>
       </div>
+
+      {/* Reset */}
+      {hasFilters && (
+        <button
+          onClick={() =>
+            onChange({ search: "", status: "", priority: "", sort: filters.sort, order: filters.order })
+          }
+          className="flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+        >
+          <X size={13} /> Clear
+        </button>
+      )}
     </div>
   );
 }
