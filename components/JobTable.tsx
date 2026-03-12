@@ -30,9 +30,15 @@ export default function JobTable({ jobs, onRefresh, onEdit }: Props) {
   async function deleteJob(id: number) {
     if (!confirm("Delete this job entry?")) return;
     setDeleting(id);
-    await fetch(`/api/jobs/${id}`, { method: "DELETE" });
-    setDeleting(null);
-    onRefresh();
+    try {
+      const res = await fetch(`/api/jobs/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      onRefresh();
+    } catch {
+      alert("Failed to delete job. Please try again.");
+    } finally {
+      setDeleting(null);
+    }
   }
 
   function exportCsv() {

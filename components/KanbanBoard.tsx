@@ -53,10 +53,16 @@ export default function KanbanBoard() {
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/jobs");
-    const data: Job[] = await res.json();
-    setJobs(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/jobs");
+      if (!res.ok) throw new Error();
+      const data: Job[] = await res.json();
+      setJobs(data);
+    } catch {
+      console.error("Failed to fetch jobs");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -95,13 +101,20 @@ export default function KanbanBoard() {
     if (!draggedJob || draggedJob.status === newStatus) return;
 
     // Optimistic update
+    const prevStatus = draggedJob.status;
     setJobs((prev) => prev.map((j) => (j.id === draggedJob.id ? { ...j, status: newStatus } : j)));
 
-    await fetch(`/api/jobs/${draggedJob.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
+    try {
+      const res = await fetch(`/api/jobs/${draggedJob.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      // Revert on failure
+      setJobs((prev) => prev.map((j) => (j.id === draggedJob.id ? { ...j, status: prevStatus } : j)));
+    }
   }
 
   if (loading) {
@@ -113,6 +126,24 @@ export default function KanbanBoard() {
   }
 
   const jobsByStatus = (status: Status) => jobs.filter((j) => j.status === status);
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this job entry?")) return;
+    const prev = jobs;
+    setJobs((j) => j.filter((x) => x.id !== id));
+    try {
+      const res = await fetch(`/api/jobs/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+    } catch {
+      setJobs(prev);
+      alert("Failed to delete job. Please try again.");
+    }
+  }
+
+  function handleEdit(job: Job) {
+    setFormInitial(job);
+    setFormOpen(true);
+  }
 
   return (
     <>
@@ -153,7 +184,7 @@ export default function KanbanBoard() {
                 <DroppableColumn status={status}>
                   <SortableContext items={colJobs.map((j) => j.id)} strategy={verticalListSortingStrategy}>
                     {colJobs.map((job) => (
-                      <KanbanCard key={job.id} job={job} />
+                      <KanbanCard key={job.id} job={job} onEdit={handleEdit} onDelete={handleDelete} />
                     ))}
                   </SortableContext>
                   {colJobs.length === 0 && (

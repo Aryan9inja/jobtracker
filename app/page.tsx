@@ -36,16 +36,27 @@ export default function DashboardPage() {
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(buildUrl(filters));
-    const data: Job[] = await res.json();
-    setJobs(data);
-    setLoading(false);
+    try {
+      const res = await fetch(buildUrl(filters));
+      if (!res.ok) throw new Error();
+      const data: Job[] = await res.json();
+      setJobs(data);
+    } catch {
+      console.error("Failed to fetch jobs");
+    } finally {
+      setLoading(false);
+    }
   }, [filters]);
 
   const fetchAll = useCallback(async () => {
-    const res = await fetch("/api/jobs");
-    const data: Job[] = await res.json();
-    setAllJobs(data);
+    try {
+      const res = await fetch("/api/jobs");
+      if (!res.ok) throw new Error();
+      const data: Job[] = await res.json();
+      setAllJobs(data);
+    } catch {
+      console.error("Failed to fetch all jobs");
+    }
   }, []);
 
   useEffect(() => {

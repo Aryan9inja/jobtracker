@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ExternalLink, MapPin } from "lucide-react";
+import { GripVertical, ExternalLink, MapPin, Pencil, Trash2 } from "lucide-react";
 import type { Job } from "@/app/generated/prisma/client";
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -11,7 +11,13 @@ const PRIORITY_DOT: Record<string, string> = {
   HIGH: "bg-red-500",
 };
 
-export default function KanbanCard({ job }: { job: Job }) {
+type Props = {
+  job: Job;
+  onEdit?: (job: Job) => void;
+  onDelete?: (id: number) => void;
+};
+
+export default function KanbanCard({ job, onEdit, onDelete }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: job.id });
 
   const style = {
@@ -58,6 +64,29 @@ export default function KanbanCard({ job }: { job: Job }) {
               >
                 <ExternalLink size={12} />
               </a>
+            )}
+          </div>
+        )}
+        {/* Actions */}
+        {(onEdit || onDelete) && (
+          <div className="flex items-center gap-0.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {onEdit && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onEdit(job); }}
+                className="rounded p-1 text-gray-300 hover:bg-indigo-100 hover:text-indigo-600 dark:text-gray-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition-colors"
+                title="Edit"
+              >
+                <Pencil size={12} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(job.id); }}
+                className="rounded p-1 text-gray-300 hover:bg-red-100 hover:text-red-600 dark:text-gray-600 dark:hover:bg-red-950 dark:hover:text-red-400 transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={12} />
+              </button>
             )}
           </div>
         )}
