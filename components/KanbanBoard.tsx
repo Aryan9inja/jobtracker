@@ -153,13 +153,13 @@ export default function KanbanBoard() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {COLUMNS.map(({ status, label, accent, dot }) => {
             const colJobs = jobsByStatus(status);
             return (
               <div
                 key={status}
-                className={`flex w-[260px] shrink-0 flex-col rounded-xl border-t-[3px] border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900/80 ${accent}`}
+                className={`flex min-w-0 flex-col rounded-xl border-t-[3px] border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900/80 ${accent}`}
               >
                 {/* Column header */}
                 <div className="flex items-center gap-2 px-3 py-3">
