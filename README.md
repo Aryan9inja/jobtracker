@@ -146,4 +146,4 @@ Before publishing this repository:
 
 ## License
 
-Add a license before making the repository public.
+This project is licensed under the MIT License. See `LICENSE` for details.
