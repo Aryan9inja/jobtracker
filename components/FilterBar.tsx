@@ -33,7 +33,7 @@ export default function FilterBar({ filters, onChange }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Search */}
-      <div className="relative flex-1 min-w-[180px] max-w-xs">
+      <div className="relative flex-1 min-w-45 max-w-xs">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"

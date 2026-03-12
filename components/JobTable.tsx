@@ -74,7 +74,7 @@ export default function JobTable({ jobs, onRefresh }: Props) {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
-        <table className="w-full min-w-[700px] text-sm">
+        <table className="w-full min-w-175 text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
               <th className="px-4 py-3">Company</th>
