@@ -1,36 +1,149 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JobTracker
 
-## Getting Started
+JobTracker is a full-stack job application tracker built with Next.js, React, Prisma, and MariaDB/MySQL. It gives you two views over the same data: a dashboard for filtering and bulk review, and a kanban board for moving applications through your pipeline.
 
-First, run the development server:
+## Features
+
+- Create, edit, and delete job applications
+- Track status across Saved, Applied, Interviewing, Offer, and Rejected
+- Assign priority levels and store salary, location, job URL, and notes
+- Filter and search by company, title, location, status, and priority
+- Sort by multiple fields from the dashboard
+- Drag and drop applications between kanban columns
+- Export all tracked jobs as CSV
+- Light and dark mode UI
+
+## Tech Stack
+
+- Next.js 16 with the App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Prisma 7
+- MariaDB/MySQL
+- dnd-kit for kanban interactions
+
+## Screens
+
+- Dashboard view at `/`
+- Kanban view at `/kanban`
+- API routes under `/api/jobs`
+
+## Project Structure
+
+```text
+app/
+	api/jobs/           REST API for listing, creating, updating, deleting, and exporting jobs
+	generated/prisma/   Generated Prisma client output
+	kanban/             Kanban page
+	page.tsx            Dashboard page
+components/           UI building blocks
+lib/prisma.ts         Prisma client setup with MariaDB adapter
+prisma/schema.prisma  Database schema
+```
+
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
+- A running MariaDB or MySQL database
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and update the values for your local database.
+
+```env
+DATABASE_URL="mysql://root:password@localhost:3306/jobtracker"
+
+DB_HOST="localhost"
+DB_PORT="3306"
+DB_USER="root"
+DB_PASSWORD="password"
+DB_NAME="jobtracker"
+```
+
+Notes:
+
+- `DATABASE_URL` is used by Prisma tooling.
+- `DB_*` variables are used by the runtime Prisma MariaDB adapter in `lib/prisma.ts`.
+
+## Installation
+
+```bash
+npm install
+```
+
+## Database Setup
+
+This repository currently includes the Prisma schema but does not include committed migrations. For a fresh local setup, push the schema directly to your database:
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+If you want migration files before publishing or deploying to shared environments, create an initial migration:
+
+```bash
+npx prisma migrate dev --name init
+```
+
+## Running Locally
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-## Learn More
+## API Overview
 
-To learn more about Next.js, take a look at the following resources:
+### `GET /api/jobs`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Returns jobs with optional query params:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `search`
+- `status`
+- `priority`
+- `sort`
+- `order`
 
-## Deploy on Vercel
+### `POST /api/jobs`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Creates a new job.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### `PUT /api/jobs/:id`
+
+Updates an existing job.
+
+### `DELETE /api/jobs/:id`
+
+Deletes a job.
+
+### `GET /api/jobs/export`
+
+Downloads all jobs as CSV.
+
+## Publishing Notes
+
+Before publishing this repository:
+
+- Keep `.env.example` updated as configuration changes
+- Decide whether to commit Prisma migrations or keep `db push` as the setup path
+- Confirm your production database connection strategy matches `lib/prisma.ts`
+- Add screenshots or a demo GIF if you want a more polished public repo page
+
+## License
+
+Add a license before making the repository public.
