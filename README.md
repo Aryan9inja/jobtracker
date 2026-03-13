@@ -60,12 +60,16 @@ DB_PORT="3306"
 DB_USER="root"
 DB_PASSWORD="password"
 DB_NAME="jobtracker"
+DB_CONNECT_TIMEOUT_MS="5000"
+DB_ACQUIRE_TIMEOUT_MS="5000"
+DB_POOL_LIMIT="10"
 ```
 
 Notes:
 
-- `DATABASE_URL` is used by Prisma tooling.
-- `DB_*` variables are used by the runtime Prisma MariaDB adapter in `lib/prisma.ts`.
+- `DATABASE_URL` is used by Prisma tooling and is now also preferred by runtime in `lib/prisma.ts`.
+- `DB_*` variables are used as runtime fallback when `DATABASE_URL` is not set.
+- `DB_CONNECT_TIMEOUT_MS`, `DB_ACQUIRE_TIMEOUT_MS`, and `DB_POOL_LIMIT` are optional runtime tuning values.
 
 ## Installation
 

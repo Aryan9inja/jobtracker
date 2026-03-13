@@ -65,7 +65,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAll();
-  }, [fetchAll, jobs]);
+  }, [fetchAll]);
 
   function handleRefresh() {
     fetchJobs();
